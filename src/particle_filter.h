@@ -10,6 +10,7 @@
 #define PARTICLE_FILTER_H_
 
 #include "helper_functions.h"
+#include <random>
 
 struct Particle {
 
@@ -21,6 +22,13 @@ struct Particle {
 	std::vector<int> associations;
 	std::vector<double> sense_x;
 	std::vector<double> sense_y;
+
+	Particle() {}
+	Particle(int id, double x, double y, double theta) : id(id), x(x), y(y), theta(theta), weight(1) {
+		//std::cout << "New" << id << "," << x << "," << y << "," << theta << std::endl;
+	}
+
+	void prediction(double delta_t, double noise[], double velocity, double yaw_rate);
 };
 
 
@@ -30,7 +38,10 @@ class ParticleFilter {
 	// Number of particles to draw
 	int num_particles; 
 	
-	
+	std::default_random_engine gen;
+	std::normal_distribution<double> dist_x;
+	std::normal_distribution<double> dist_y;
+	std::normal_distribution<double> dist_theta;
 	
 	// Flag, if filter is initialized
 	bool is_initialized;
@@ -101,7 +112,7 @@ public:
 	 * Set a particles list of associations, along with the associations calculated world x,y coordinates
 	 * This can be a very useful debugging tool to make sure transformations are correct and assocations correctly connected
 	 */
-	Particle SetAssociations(Particle& particle, const std::vector<int>& associations,
+	void SetAssociations(Particle& particle, const std::vector<int>& associations,
 		                     const std::vector<double>& sense_x, const std::vector<double>& sense_y);
 
 	
