@@ -55,7 +55,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	dist_y = normal_distribution<double>(0, std[1]);
 	dist_theta = normal_distribution<double>(0, std[2]);
 
-	num_particles = 1000;
+	num_particles = 100;
 
 	for (int i = 0; i < num_particles; i++) {
 		double sample_x = x + dist_x(gen);
