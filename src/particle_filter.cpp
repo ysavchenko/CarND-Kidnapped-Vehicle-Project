@@ -108,6 +108,9 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	double sig_y = std_landmark[1];
 	double gauss_norm = (1. / (2 * M_PI * sig_x * sig_y));
 
+	double sig_x_squared_double = 2 * sig_x * sig_x;
+	double sig_y_squared_double = 2 * sig_y * sig_y;
+
 	for (Particle& particle : particles) {
 
 		particle.weight = 1;
@@ -124,8 +127,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 				double closest_x, closest_y;
 				for (auto observation : observations) {
 					// Transform from car to map
-					double x_t = particle.x + (cos(particle.theta) * observation.x) - (sin(particle.theta) * observation.y);
-					double y_t = particle.y + (sin(particle.theta) * observation.x) + (cos(particle.theta) * observation.y);
+					double theta_sin = sin(particle.theta);
+					double theta_cos = cos(particle.theta);
+					double x_t = particle.x + (theta_cos * observation.x) - (theta_sin * observation.y);
+					double y_t = particle.y + (theta_sin * observation.x) + (theta_cos * observation.y);
 					double distance = dist(x_t, y_t, landmark.x_f, landmark.y_f);
 					if (distance < min_distance) {
 						min_distance = distance;
@@ -136,7 +141,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 				if (min_distance < numeric_limits<double>::max()) {
 					double dist_x = closest_x - landmark.x_f;
 					double dist_y = closest_y - landmark.y_f;
-					double exponent = (dist_x * dist_x) / (2 * sig_x * sig_x) + (dist_y * dist_y) / (2 * sig_y * sig_y);
+					double exponent = (dist_x * dist_x) / sig_x_squared_double + (dist_y * dist_y) / sig_y_squared_double;
 					double weight = gauss_norm * exp(-exponent);
 
 					//cout << "Particle " << particle.id << " +weight " << weight << endl;
